@@ -45,8 +45,15 @@ export async function POST(request) {
       return NextResponse.json({ error: "Unsupported file type." }, { status: 400 });
     }
 
-    if (!text || text.trim().length === 0) {
+    if (!text || (typeof text !== 'string' && typeof text.toString !== 'function')) {
       return NextResponse.json({ error: "No text could be extracted from this file." }, { status: 400 });
+    }
+
+    // Force to string if it's not one (e.g. if it's an array or object)
+    text = String(text);
+
+    if (text.trim().length === 0) {
+      return NextResponse.json({ error: "Extracted text is empty." }, { status: 400 });
     }
 
     // Process chunks

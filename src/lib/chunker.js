@@ -16,6 +16,7 @@ export class RecursiveCharacterTextSplitter {
    * @returns {string[]}
    */
   splitText(text) {
+    if (typeof text !== 'string') text = String(text);
     const finalChunks = [];
     let separator = this.separators[this.separators.length - 1];
     
