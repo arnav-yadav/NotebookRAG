@@ -14,15 +14,12 @@ export async function POST(request) {
     }
 
     // 1. Embed the user's query
-    console.log(`Chat Query: "${query}" for Doc: ${documentId}`);
     const queryEmbedding = await embedText(query);
 
     // 2. Retrieve relevant chunks
     const retrievedChunks = await searchSimilarChunks(documentId, queryEmbedding, 5);
-    console.log(`Retrieved ${retrievedChunks.length} chunks from Qdrant`);
 
     if (retrievedChunks.length === 0) {
-      console.warn("No relevant chunks found in database.");
       return NextResponse.json({ 
         answer: "I couldn't find any relevant information in the document.",
         sources: []

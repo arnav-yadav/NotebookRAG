@@ -8,7 +8,6 @@ import { v4 as uuidv4 } from "uuid";
 export const maxDuration = 60; // Allow 60s for Vercel
 
 export async function POST(request) {
-  console.log("Upload request received");
   try {
     if (!process.env.OPENAI_API_KEY || !process.env.QDRANT_URL) {
       console.error("Missing Environment Variables");
@@ -24,7 +23,7 @@ export async function POST(request) {
       return NextResponse.json({ error: "No file uploaded" }, { status: 400 });
     }
 
-    console.log(`Processing file: ${file.name}, size: ${file.size}`);
+
 
     const bytes = await file.arrayBuffer();
     const binaryData = new Uint8Array(bytes);
@@ -51,7 +50,7 @@ export async function POST(request) {
 
     // Force to string if it's not one (e.g. if it's an array or object)
     text = String(text);
-    console.log(`Extracted text length: ${text.length} characters`);
+
 
     if (text.trim().length === 0) {
       console.error("No text extracted from PDF");
@@ -65,16 +64,16 @@ export async function POST(request) {
     });
     
     const chunks = splitter.splitText(text);
-    console.log(`Split into ${chunks.length} chunks`);
+
 
     // Generate embeddings
     const embeddings = await embedChunks(chunks);
-    console.log(`Generated ${embeddings.length} embeddings`);
+
 
     // Store in Qdrant
     const documentId = uuidv4();
     await upsertChunks(documentId, file.name, chunks, embeddings);
-    console.log(`Successfully stored document ${documentId} in Qdrant`);
+
 
     return NextResponse.json({ 
       success: true, 

@@ -17,8 +17,6 @@ export async function generateGroundedAnswer(query, retrievedChunks) {
     return `[Source ${i + 1}]:\n${chunk.payload.text}`;
   }).join("\n\n");
 
-  console.log(`Sending context to AI (${contextText.length} chars). Snippet: ${contextText.substring(0, 100)}...`);
-
   const systemPrompt = `You are a helpful AI assistant that answers questions based ONLY on the provided document excerpts.
 Your goal is to be accurate, helpful, and properly cite your sources.
 
