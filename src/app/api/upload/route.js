@@ -8,9 +8,13 @@ import { v4 as uuidv4 } from "uuid";
 export const maxDuration = 60; // Allow 60s for Vercel
 
 export async function POST(request) {
+  console.log("Upload request received");
   try {
-    if (!process.env.OPENAI_API_KEY) {
-      return NextResponse.json({ error: "OpenAI API Key is missing. Please add it to your Vercel Environment Variables." }, { status: 500 });
+    if (!process.env.OPENAI_API_KEY || !process.env.QDRANT_URL) {
+      console.error("Missing Environment Variables");
+      return NextResponse.json({ 
+        error: "Server configuration error: Missing API keys on Vercel." 
+      }, { status: 500 });
     }
 
     const formData = await request.formData();
@@ -20,42 +24,46 @@ export async function POST(request) {
       return NextResponse.json({ error: "No file uploaded" }, { status: 400 });
     }
 
+    console.log(`Processing file: ${file.name}, size: ${file.size}`);
+
     const bytes = await file.arrayBuffer();
     const buffer = Buffer.from(bytes);
     
     let text = "";
     
     if (file.name.toLowerCase().endsWith(".pdf")) {
-      const parser = new PDFParse({ data: buffer });
-      const result = await parser.getText();
-      text = result.text;
-      await parser.destroy();
+      try {
+        const parser = new PDFParse({ data: buffer });
+        const result = await parser.getText();
+        text = result.text;
+        await parser.destroy();
+      } catch (pdfErr) {
+        console.error("PDF Parsing Error:", pdfErr);
+        return NextResponse.json({ error: "Failed to parse PDF: " + pdfErr.message }, { status: 500 });
+      }
     } else if (file.name.toLowerCase().endsWith(".txt")) {
       text = buffer.toString("utf-8");
     } else {
-      return NextResponse.json({ error: "Unsupported file type. Please upload a PDF or TXT file." }, { status: 400 });
+      return NextResponse.json({ error: "Unsupported file type." }, { status: 400 });
     }
 
     if (!text || text.trim().length === 0) {
-      return NextResponse.json({ error: "Could not extract text from the file." }, { status: 400 });
+      return NextResponse.json({ error: "No text could be extracted from this file." }, { status: 400 });
     }
 
-    // Process the text
+    // Process chunks
     const splitter = new RecursiveCharacterTextSplitter({
       chunkSize: 1000,
       chunkOverlap: 200,
     });
     
     const chunks = splitter.splitText(text);
-    
-    if (chunks.length === 0) {
-      return NextResponse.json({ error: "No valid text chunks found." }, { status: 400 });
-    }
+    console.log(`Split into ${chunks.length} chunks`);
 
     // Generate embeddings
     const embeddings = await embedChunks(chunks);
 
-    // Store in vector database
+    // Store in Qdrant
     const documentId = uuidv4();
     await upsertChunks(documentId, file.name, chunks, embeddings);
 
@@ -67,7 +75,12 @@ export async function POST(request) {
     });
 
   } catch (error) {
-    console.error("Upload error:", error);
-    return NextResponse.json({ error: "Failed to process the document" }, { status: 500 });
+    console.error("GLOBAL UPLOAD ERROR:", error);
+    // GUARANTEE JSON RESPONSE
+    return NextResponse.json({ 
+      error: "Internal Server Error: " + (error.message || "Unknown error"),
+      details: error.stack
+    }, { status: 500 });
   }
 }
+
