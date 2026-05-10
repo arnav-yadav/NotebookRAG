@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { RecursiveCharacterTextSplitter } from "@/lib/chunker";
 import { embedChunks } from "@/lib/embeddings";
 import { upsertChunks } from "@/lib/vectorStore";
-import { PDFParse } from "pdf-parse";
+import pdf from "pdf-parse";
 import { v4 as uuidv4 } from "uuid";
 
 export const maxDuration = 60; // Allow 60s for Vercel
@@ -33,10 +33,8 @@ export async function POST(request) {
     
     if (file.name.toLowerCase().endsWith(".pdf")) {
       try {
-        const parser = new PDFParse({ data: buffer });
-        const result = await parser.getText();
-        text = result.text;
-        await parser.destroy();
+        const data = await pdf(buffer);
+        text = data.text;
       } catch (pdfErr) {
         console.error("PDF Parsing Error:", pdfErr);
         return NextResponse.json({ error: "Failed to parse PDF: " + pdfErr.message }, { status: 500 });
