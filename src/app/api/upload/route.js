@@ -27,21 +27,20 @@ export async function POST(request) {
     console.log(`Processing file: ${file.name}, size: ${file.size}`);
 
     const bytes = await file.arrayBuffer();
-    const buffer = Buffer.from(bytes);
+    const binaryData = new Uint8Array(bytes);
     
     let text = "";
     
     if (file.name.toLowerCase().endsWith(".pdf")) {
       try {
-        const result = await extractText(buffer);
+        const result = await extractText(binaryData);
         text = result.text;
       } catch (pdfErr) {
         console.error("PDF Parsing Error:", pdfErr);
         return NextResponse.json({ error: "Failed to parse PDF: " + pdfErr.message }, { status: 500 });
       }
     } else if (file.name.toLowerCase().endsWith(".txt")) {
-
-      text = buffer.toString("utf-8");
+      text = new TextDecoder().decode(binaryData);
     } else {
       return NextResponse.json({ error: "Unsupported file type." }, { status: 400 });
     }
