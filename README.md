@@ -1,36 +1,46 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# NotebookRAG 📚
 
-## Getting Started
+A professional, grounded AI chat application built for conversational RAG (Retrieval-Augmented Generation). Upload documents and have accurate, cited conversations with your data.
 
-First, run the development server:
+## 🚀 Features
+- **PDF & TXT Support**: Seamlessly upload and index document content.
+- **Grounded Generation**: Answers are strictly derived from the uploaded documents to prevent hallucinations.
+- **Source Citations**: Every answer includes clickable citations to the exact part of the document used.
+- **Vector Search**: High-performance semantic search powered by Qdrant Cloud.
+- **Premium UI**: Modern, glassmorphic dark mode interface built with Next.js.
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+## 🛠️ Tech Stack
+- **Framework**: [Next.js](https://nextjs.org/) (App Router)
+- **AI Models**: 
+  - **Generation**: OpenAI `gpt-4o-mini`
+  - **Embeddings**: OpenAI `text-embedding-3-small`
+- **Vector Database**: [Qdrant Cloud](https://qdrant.tech/)
+- **Parsing**: `pdf-parse` (v2)
+- **Styling**: Vanilla CSS with modern design tokens
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## 📋 Setup Instructions
 
-You can start editing the page by modifying `app/page.js`. The page auto-updates as you edit the file.
+1. **Clone & Install**:
+   ```bash
+   npm install
+   ```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+2. **Environment Variables**:
+   Create a `.env.local` file in the root directory:
+   ```env
+   OPENAI_API_KEY=your_key_here
+   QDRANT_URL=your_qdrant_url
+   QDRANT_API_KEY=your_qdrant_api_key
+   ```
 
-## Learn More
+3. **Run Development Server**:
+   ```bash
+   npm run dev
+   ```
 
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## 🏗️ Architecture
+1. **Ingestion**: Documents are split into semantic chunks using a recursive character text splitter.
+2. **Embedding**: Each chunk is converted into a 1536-dimensional vector using OpenAI's embedding model.
+3. **Storage**: Vectors and metadata are stored in a Qdrant collection with payload indexing for fast retrieval.
+4. **Retrieval**: User queries are embedded and compared against the vector store using cosine similarity.
+5. **Generation**: The top relevant chunks are passed to GPT-4o-mini as context to generate a cited, grounded response.
