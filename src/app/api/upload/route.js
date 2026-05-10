@@ -9,6 +9,10 @@ export const maxDuration = 60; // Allow 60s for Vercel
 
 export async function POST(request) {
   try {
+    if (!process.env.OPENAI_API_KEY) {
+      return NextResponse.json({ error: "OpenAI API Key is missing. Please add it to your Vercel Environment Variables." }, { status: 500 });
+    }
+
     const formData = await request.formData();
     const file = formData.get("file");
 
