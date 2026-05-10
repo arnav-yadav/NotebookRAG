@@ -51,8 +51,10 @@ export async function POST(request) {
 
     // Force to string if it's not one (e.g. if it's an array or object)
     text = String(text);
+    console.log(`Extracted text length: ${text.length} characters`);
 
     if (text.trim().length === 0) {
+      console.error("No text extracted from PDF");
       return NextResponse.json({ error: "Extracted text is empty." }, { status: 400 });
     }
 
@@ -67,10 +69,12 @@ export async function POST(request) {
 
     // Generate embeddings
     const embeddings = await embedChunks(chunks);
+    console.log(`Generated ${embeddings.length} embeddings`);
 
     // Store in Qdrant
     const documentId = uuidv4();
     await upsertChunks(documentId, file.name, chunks, embeddings);
+    console.log(`Successfully stored document ${documentId} in Qdrant`);
 
     return NextResponse.json({ 
       success: true, 
