@@ -1,46 +1,69 @@
 # NotebookRAG 📚
 
-A professional, grounded AI chat application built for conversational RAG (Retrieval-Augmented Generation). Upload documents and have accurate, cited conversations with your data.
+A high-performance, grounded AI document assistant built with **Next.js**, **OpenAI**, and **Qdrant**. This application implements a full RAG (Retrieval-Augmented Generation) pipeline to provide accurate, cited answers based strictly on uploaded documents.
 
-## 🚀 Features
-- **PDF & TXT Support**: Seamlessly upload and index document content.
-- **Grounded Generation**: Answers are strictly derived from the uploaded documents to prevent hallucinations.
-- **Source Citations**: Every answer includes clickable citations to the exact part of the document used.
-- **Vector Search**: High-performance semantic search powered by Qdrant Cloud.
-- **Premium UI**: Modern, glassmorphic dark mode interface built with Next.js.
+![License](https://img.shields.io/badge/license-MIT-blue.svg)
+![Next.js](https://img.shields.io/badge/Next.js-15+-black)
+![React](https://img.shields.io/badge/React-19-61dafb)
 
-## 🛠️ Tech Stack
-- **Framework**: [Next.js](https://nextjs.org/) (App Router)
-- **AI Models**: 
-  - **Generation**: OpenAI `gpt-4o-mini`
-  - **Embeddings**: OpenAI `text-embedding-3-small`
+## 🚀 Key Features
+- **Semantic Search**: Uses OpenAI `text-embedding-3-small` to find relevant context with high precision.
+- **Grounded AI**: Powered by `gpt-4o-mini`, ensuring answers are factually tied to your documents.
+- **Citations & Sources**: Automatic source attribution with clickable document excerpts.
+- **Modern PDF Parsing**: Robust extraction using `unpdf` (supports modern PDF/A and XRef formats).
+- **Glassmorphic UI**: Premium dark-mode interface with real-time indexing feedback.
+
+## 🛠️ Architecture
+The system follows a standard RAG architecture optimized for serverless deployment:
+
+```mermaid
+graph TD
+    A[User Uploads PDF/TXT] --> B[Text Extraction - unpdf]
+    B --> C[Recursive Chunking]
+    C --> D[OpenAI Embeddings]
+    D --> E[Qdrant Vector Store]
+    
+    F[User Query] --> G[Query Embedding]
+    G --> H[Vector Similarity Search]
+    H --> I[Context Retrieval]
+    I --> J[GPT-4o mini Generation]
+    J --> K[Grounded Answer + Sources]
+```
+
+## 🏗️ Tech Stack
+- **Frontend/API**: [Next.js](https://nextjs.org/) (App Router & Turbopack)
+- **AI/LLM**: [OpenAI API](https://openai.com/)
 - **Vector Database**: [Qdrant Cloud](https://qdrant.tech/)
-- **Parsing**: `pdf-parse` (v2)
-- **Styling**: Vanilla CSS with modern design tokens
+- **Text Processing**: [unpdf](https://github.com/unjs/unpdf) & [RecursiveCharacterTextSplitter](https://github.com/langchain-ai/langchainjs)
+- **Styling**: Vanilla CSS (Modern Design System)
 
-## 📋 Setup Instructions
+## 📋 Installation & Setup
 
-1. **Clone & Install**:
+1. **Clone the repository**:
+   ```bash
+   git clone https://github.com/your-username/NotebookRAG.git
+   cd NotebookRAG
+   ```
+
+2. **Install dependencies**:
    ```bash
    npm install
    ```
 
-2. **Environment Variables**:
-   Create a `.env.local` file in the root directory:
+3. **Configure Environment Variables**:
+   Create a `.env.local` file:
    ```env
-   OPENAI_API_KEY=your_key_here
-   QDRANT_URL=your_qdrant_url
-   QDRANT_API_KEY=your_qdrant_api_key
+   OPENAI_API_KEY=sk-your-key
+   QDRANT_URL=https://your-cluster-url.qdrant.io:6333
+   QDRANT_API_KEY=your-api-key
    ```
 
-3. **Run Development Server**:
+4. **Run the app**:
    ```bash
    npm run dev
    ```
 
-## 🏗️ Architecture
-1. **Ingestion**: Documents are split into semantic chunks using a recursive character text splitter.
-2. **Embedding**: Each chunk is converted into a 1536-dimensional vector using OpenAI's embedding model.
-3. **Storage**: Vectors and metadata are stored in a Qdrant collection with payload indexing for fast retrieval.
-4. **Retrieval**: User queries are embedded and compared against the vector store using cosine similarity.
-5. **Generation**: The top relevant chunks are passed to GPT-4o-mini as context to generate a cited, grounded response.
+## 🧠 Technical Highlights (For Submission)
+- **Vector Indexing**: Implemented Payload Indexing in Qdrant to allow for O(1) document filtering.
+- **Serverless Optimization**: Optimized the PDF processing pipeline to run within Vercel's execution limits by using zero-dependency, non-worker-based parsers.
+- **Grounded Prompting**: Utilized system-level constraints to prevent AI hallucinations, ensuring the assistant only answers using provided context.
