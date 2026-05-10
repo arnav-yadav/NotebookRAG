@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { RecursiveCharacterTextSplitter } from "@/lib/chunker";
 import { embedChunks } from "@/lib/embeddings";
 import { upsertChunks } from "@/lib/vectorStore";
-import pdf from "pdf-parse";
+import pdf from "pdf-parse-fork";
 import { v4 as uuidv4 } from "uuid";
 
 export const maxDuration = 60; // Allow 60s for Vercel
